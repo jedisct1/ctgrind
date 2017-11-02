@@ -358,6 +358,15 @@ void VG_(needs_malloc_replacement)(
    VG_(tdict).tool_client_redzone_szB   = client_malloc_redzone_szB;
 }
 
+void VG_(needs_poison_func)(
+   void (*poison_func)           ( void*, SizeT ),
+   void (*unpoison_func)         ( void*, SizeT )
+)
+{
+  VG_(tdict).tool_poison = poison_func;
+  VG_(tdict).tool_unpoison = unpoison_func;
+}
+
 void VG_(needs_xml_output)( void )
 {
    VG_(needs).xml_output = True;

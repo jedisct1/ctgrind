@@ -374,6 +374,34 @@ out:
 #  error Unknown OS
 #endif
 
+static int init_done = 0;
+static void (*poison_funcs[2]) (void*, SizeT);
+
+static void init_if_needed() {
+  if (!init_done) {
+    int res;
+    init_done = 1;
+    VALGRIND_DO_CLIENT_REQUEST(res, -1, VG_USERREQ__GET_POISONFUNCS, &poison_funcs,
+                               0, 0, 0, 0);
+  }
+}
+
+void VG_REPLACE_FUNCTION_ZU(libctgrindZdsoZa, ct_poison)(void *ptr, SizeT len);
+void VG_REPLACE_FUNCTION_ZU(libctgrindZdsoZa, ct_poison)(void *ptr, SizeT len) {
+  init_if_needed();
+
+  if (poison_funcs[0])
+    VALGRIND_NON_SIMD_CALL2(poison_funcs[0], ptr, len);
+}
+
+void VG_REPLACE_FUNCTION_ZU(libctgrindZdsoZa, ct_unpoison)(void *ptr, SizeT len);
+void VG_REPLACE_FUNCTION_ZU(libctgrindZdsoZa, ct_unpoison)(void *ptr, SizeT len) {
+  init_if_needed();
+
+  if (poison_funcs[1])
+    VALGRIND_NON_SIMD_CALL2(poison_funcs[1], ptr, len);
+}
+
 /*--------------------------------------------------------------------*/
 /*--- end                                                          ---*/
 /*--------------------------------------------------------------------*/

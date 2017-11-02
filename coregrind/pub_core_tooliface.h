@@ -171,6 +171,10 @@ typedef struct {
    SizeT (*tool_malloc_usable_size)  (ThreadId, void*);
    SizeT tool_client_redzone_szB;
 
+   // VG_(needs).poison
+   void (*tool_poison)               (void*, SizeT);
+   void (*tool_unpoison)             (void*, SizeT);
+
    // VG_(needs).final_IR_tidy_pass
    IRSB* (*tool_final_IR_tidy_pass)  (IRSB*);
 
